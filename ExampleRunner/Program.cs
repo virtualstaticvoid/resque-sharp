@@ -1,41 +1,30 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using resque;
-using System.Reflection;
-
-class DummyJob
+﻿namespace ExampleRunner
 {
-    public static string queue()
-    {
-        return "jobs";
-    }
-    public static void perform(params object[] args)
-    {
-        Console.WriteLine("This is the dummy job reporting in");
-    }
-}
+  using System;
+  using System.Configuration;
+  using System.Reflection;
+  using resque;
 
-namespace ExampleRunner
-{
-    class Program
+  class Program
+  {
+    static void Main(string[] args)
     {
-        static void Main(string[] args)
-        {
-            Console.WriteLine(resque.DummyJob.assemblyQualifiedName());
-            
-            Type t = typeof(DummyJob);
-            Assembly.GetExecutingAssembly();
+      Console.WriteLine(resque.DummyJob.assemblyQualifiedName());
 
-            Console.WriteLine(t.AssemblyQualifiedName);
-            string assemblyQualification = ", ExampleRunner, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null";
-            Resque.setAssemblyQualifier(assemblyQualification);
-            String server = "192.168.1.7";
-            Resque.setRedis(new Redis(server, 6379));
-            Job.create("jobs", "DummyJob", "foo", 20, "bar");
-            Worker w = new Worker("*");
-            w.work(1);
-        }
+      Type t = typeof(DummyJob);
+      Assembly.GetExecutingAssembly();
+
+      Console.WriteLine(t.AssemblyQualifiedName);
+      const string assemblyQualification = ", ExampleRunner, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null";
+      Resque.setAssemblyQualifier(assemblyQualification);
+
+      String server = ConfigurationManager.AppSettings["redis-host"];
+      String port = ConfigurationManager.AppSettings["redis-port"] ?? "6379";
+
+      Resque.setRedis(new Redis(server, Convert.ToInt32(port)));
+      Job.create("jobs", "DummyJob", "foo", 20, "bar");
+      Worker w = new Worker("*");
+      w.work(1);
     }
+  }
 }
