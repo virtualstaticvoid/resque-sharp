@@ -24,11 +24,7 @@
     [SetUp]
     public void Init()
     {
-      // This is the IP address of my computer running Redis. 
-      server = "ec2-184-73-7-218.compute-1.amazonaws.com";
-      //server = "192.168.56.102";
-
-      Resque.setRedis(new Redis(server, 6379));
+      Resque.setRedis(ServerHelper.GetRedis());
       Resque.redis().FlushAll();
 
       Exception ex = new Exception(testString);
